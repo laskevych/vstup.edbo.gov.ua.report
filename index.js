@@ -171,16 +171,41 @@ let applicantsFirstPriorityQuotasNotPass = applicantsFirstPriorityQuotas.slice(Q
 let applicantsFirstPriorityWithoutQuotas = extractor.getApplicantsByFilter(PRIORITY.First, false);
 let applicantsOther = applicantsFirstPriorityWithoutQuotas.concat(applicantsFirstPriorityQuotasNotPass);
 applicantsOther.sort(extractor.sortByScore);
+const dataJson = [];
 applicantsFirstPriorityQuotasPass.forEach((applicant, index) => {
     console.log(`${index + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
+    dataJson.push({
+        position: index + 1,
+        id: applicant.id,
+        priority: applicant.priority,
+        score: applicant.score,
+        has_quota: applicant.hasQuota,
+        rating: 'quotas'
+    });
 });
 for (let i = 0; i < TOTAL_LIMIT - QUOTAS_LIMIT; i++) {
     let applicant = (_a = applicantsOther[i]) !== null && _a !== void 0 ? _a : undefined;
     if (applicant) {
         console.log(`${i + QUOTAS_LIMIT + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
+        dataJson.push({
+            position: i + QUOTAS_LIMIT + 1,
+            id: applicant.id,
+            priority: applicant.priority,
+            score: applicant.score,
+            has_quota: applicant.hasQuota,
+            rating: 'general'
+        });
     }
     else {
         console.log(`${i + QUOTAS_LIMIT + 1}. Free place ✅`);
+        dataJson.push({
+            position: i + QUOTAS_LIMIT + 1,
+            id: '',
+            priority: '',
+            score: '',
+            has_quota: '',
+            rating: 'free'
+        });
     }
 }
 console.log(`\n`);
