@@ -16,12 +16,20 @@ var SCORE_METRIC;
     SCORE_METRIC[SCORE_METRIC["avg"] = 1] = "avg";
     SCORE_METRIC[SCORE_METRIC["max"] = 2] = "max";
 })(SCORE_METRIC || (SCORE_METRIC = {}));
-const QUOTAS_LIMIT = 52;
-const TOTAL_LIMIT = 130;
-const CONTRACT_LIMIT = 20;
 class Index {
     constructor() {
+        this.governmentLimit = 0;
+        this.contractLimit = 0;
         this.applicants = this.extract();
+    }
+    getGovernmentLimit() {
+        return this.governmentLimit;
+    }
+    getContractLimit() {
+        return this.contractLimit;
+    }
+    getQuotasLimit() {
+        return Math.round(this.governmentLimit * 0.4);
     }
     getApplicantsByFilter(priority, hasQuota) {
         return this.getApplicants().filter(applicant => {
@@ -81,6 +89,19 @@ class Index {
         return a.score > b.score ? -1 : 1;
     }
     extract() {
+        /**
+         * Лимиты
+         */
+        let idMaxOfferElement = document.getElementsByClassName('offer-max-order');
+        if (idMaxOfferElement.length > 0) {
+            let textContent = idMaxOfferElement[0].getElementsByTagName('dd')[0].textContent;
+            this.governmentLimit = parseInt(textContent !== null && textContent !== void 0 ? textContent : '0');
+        }
+        let idMaxOfferContractElement = document.getElementsByClassName('offer-order-contract');
+        if (idMaxOfferContractElement.length > 0) {
+            let textContent = idMaxOfferContractElement[0].getElementsByTagName('dd')[0].textContent;
+            this.contractLimit = parseInt(textContent !== null && textContent !== void 0 ? textContent : '0');
+        }
         /**
          * Заявки со статусом "Допущенные"
          */
@@ -149,7 +170,7 @@ console.log(`   5️⃣ Priority: ${extractor.getApplicantsByFilter(PRIORITY.Fif
 console.log(`   💵 Contract: ${extractor.getApplicantsByFilter(PRIORITY.Contract, null).length} requests.`);
 console.log(`   ⛔️ Error: ${extractor.getApplicantsByFilter(PRIORITY.Error, null).length} requests.`);
 console.log('\n');
-console.log(`👋 Quota: ${extractor.getApplicantsByFilter(null, true).length} requests of limit ${QUOTAS_LIMIT}`);
+console.log(`👋 Quota: ${extractor.getApplicantsByFilter(null, true).length} requests of limit ${extractor.getQuotasLimit()}`);
 console.log(`\n`);
 console.log(`1️⃣ First priority score report`);
 let applicantsFirstPriority = extractor.getApplicantsByFilter(PRIORITY.First, null);
@@ -166,15 +187,15 @@ console.log(`\n`);
 console.log(`👑 Forecasted rating`);
 console.log(`\n`);
 let applicantsFirstPriorityQuotas = extractor.getApplicantsByFilter(PRIORITY.First, true);
-let applicantsFirstPriorityQuotasPass = applicantsFirstPriorityQuotas.slice(0, QUOTAS_LIMIT);
-let applicantsFirstPriorityQuotasNotPass = applicantsFirstPriorityQuotas.slice(QUOTAS_LIMIT + 1);
+let applicantsFirstPriorityQuotasPass = applicantsFirstPriorityQuotas.slice(0, extractor.getQuotasLimit());
+let applicantsFirstPriorityQuotasNotPass = applicantsFirstPriorityQuotas.slice(extractor.getQuotasLimit() + 1);
 let applicantsFirstPriorityWithoutQuotas = extractor.getApplicantsByFilter(PRIORITY.First, false);
 let applicantsOther = applicantsFirstPriorityWithoutQuotas.concat(applicantsFirstPriorityQuotasNotPass);
 applicantsOther.sort(extractor.sortByScore);
-const dataJson = [];
+const reportJson = [];
 applicantsFirstPriorityQuotasPass.forEach((applicant, index) => {
     console.log(`${index + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
-    dataJson.push({
+    reportJson.push({
         position: index + 1,
         id: applicant.id,
         priority: applicant.priority,
@@ -183,12 +204,12 @@ applicantsFirstPriorityQuotasPass.forEach((applicant, index) => {
         rating: 'quotas'
     });
 });
-for (let i = 0; i < TOTAL_LIMIT - QUOTAS_LIMIT; i++) {
+for (let i = 0; i < extractor.getGovernmentLimit() - extractor.getQuotasLimit(); i++) {
     let applicant = (_a = applicantsOther[i]) !== null && _a !== void 0 ? _a : undefined;
     if (applicant) {
-        console.log(`${i + QUOTAS_LIMIT + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
-        dataJson.push({
-            position: i + QUOTAS_LIMIT + 1,
+        console.log(`${i + extractor.getQuotasLimit() + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
+        reportJson.push({
+            position: i + extractor.getQuotasLimit() + 1,
             id: applicant.id,
             priority: applicant.priority,
             score: applicant.score,
@@ -197,9 +218,9 @@ for (let i = 0; i < TOTAL_LIMIT - QUOTAS_LIMIT; i++) {
         });
     }
     else {
-        console.log(`${i + QUOTAS_LIMIT + 1}. Free place ✅`);
-        dataJson.push({
-            position: i + QUOTAS_LIMIT + 1,
+        console.log(`${i + extractor.getQuotasLimit() + 1}. Free place ✅`);
+        reportJson.push({
+            position: i + extractor.getQuotasLimit() + 1,
             id: '',
             priority: '',
             score: '',
@@ -209,14 +230,31 @@ for (let i = 0; i < TOTAL_LIMIT - QUOTAS_LIMIT; i++) {
     }
 }
 console.log(`\n`);
-console.log(`👑 Forecasted rating [contract]`);
+console.log(`💵 Forecasted rating list [contract]`);
 console.log(`\n`);
-for (let i = 0; i < CONTRACT_LIMIT; i++) {
+let reportContractJson = [];
+for (let i = 0; i < extractor.getContractLimit(); i++) {
     let applicant = (_b = applicantsContract[i]) !== null && _b !== void 0 ? _b : undefined;
     if (applicant) {
         console.log(`${i + 1}. ID: ${applicant.id} || ${applicant.score}`);
+        reportContractJson.push({
+            position: i + extractor.getQuotasLimit() + 1,
+            id: applicant.id,
+            priority: applicant.priority,
+            score: applicant.score,
+            has_quota: applicant.hasQuota,
+            rating: 'general'
+        });
     }
     else {
         console.log(`${i + 1}. Free place ✅`);
+        reportContractJson.push({
+            position: i + extractor.getQuotasLimit() + 1,
+            id: '',
+            priority: '',
+            score: '',
+            has_quota: '',
+            rating: 'free'
+        });
     }
 }
