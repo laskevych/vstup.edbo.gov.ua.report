@@ -22,6 +22,11 @@ const pagesForExtracting = [
         "speciality": "Комп’ютерні науки та інтелектуальні системи (Інноваційний кампус)",
         "speciality_id": "122",
         "url": "https://vstup.edbo.gov.ua/offer/1069048/"
+    },
+    {
+        "speciality": "Програмне забезпечення інформаційних систем (Інноваційний кампус)",
+        "speciality_id": "126",
+        "url": "https://vstup.edbo.gov.ua/offer/1069087/"
     }
 ];
 
@@ -302,7 +307,7 @@ function dataExtracting() {
 
     let applicantsFirstPriorityQuotas = extractor.getApplicantsByFilter(PRIORITY.First, true);
     let applicantsFirstPriorityQuotasPass = applicantsFirstPriorityQuotas.slice(0, extractor.getQuotasLimit());
-    let applicantsFirstPriorityQuotasNotPass = applicantsFirstPriorityQuotas.slice(extractor.getQuotasLimit() + 1);
+    let applicantsFirstPriorityQuotasNotPass = applicantsFirstPriorityQuotas.slice(extractor.getQuotasLimit());
 
     let applicantsFirstPriorityWithoutQuotas = extractor.getApplicantsByFilter(PRIORITY.First, false);
     let applicantsOther =  applicantsFirstPriorityWithoutQuotas.concat(applicantsFirstPriorityQuotasNotPass);
