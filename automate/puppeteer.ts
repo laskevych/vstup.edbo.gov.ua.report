@@ -24,6 +24,26 @@ const pagesForExtracting = [
         "url": "https://vstup.edbo.gov.ua/offer/1069048/"
     },
     {
+        "speciality": "Сучасне програмування, мобільні пристрої та комп'ютерні ігри (Інноваційний кампус)",
+        "speciality_id": "123",
+        "url": "https://vstup.edbo.gov.ua/offer/1069060/"
+    },
+    {
+        "speciality": "Прикладна комп'ютерна інженерія",
+        "speciality_id": "123",
+        "url": "https://vstup.edbo.gov.ua/offer/1069068/"
+    },
+    {
+        "speciality": "Системний аналіз і управління",
+        "speciality_id": "124",
+        "url": "https://vstup.edbo.gov.ua/offer/1069074/"
+    },
+    {
+        "speciality": "Кібербезпека",
+        "speciality_id": "125",
+        "url": "https://vstup.edbo.gov.ua/offer/1069080/"
+    },
+    {
         "speciality": "Програмне забезпечення інформаційних систем (Інноваційний кампус)",
         "speciality_id": "126",
         "url": "https://vstup.edbo.gov.ua/offer/1069087/"
@@ -211,10 +231,6 @@ function dataExtracting() {
         }
 
         protected extract(): Applicant[] {
-
-            /**
-             * Лимиты
-             */
 
             let idMaxOfferElement = document.getElementsByClassName('offer-max-order');
             if (idMaxOfferElement.length > 0) {

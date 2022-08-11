@@ -21,7 +21,7 @@ enum SCORE_METRIC {
     'max'
 }
 
-class Index {
+class Extractor {
     protected applicants: Applicant[];
 
     protected governmentLimit: number = 0;
@@ -204,7 +204,7 @@ class Index {
     }
 }
 
-const extractor = new Index();
+const extractor = new Extractor();
 
 /* Report */
 
@@ -228,11 +228,6 @@ console.log(`    MAX: ${extractor.getScoreMetric(
     SCORE_METRIC.max
 )}`);
 
-console.log(`    AVG: ${extractor.getScoreMetric(
-    applicantsFirstPriority,
-    SCORE_METRIC.avg
-)}`);
-
 console.log(`    MIN: ${extractor.getScoreMetric(
     applicantsFirstPriority,
     SCORE_METRIC.min
@@ -244,11 +239,6 @@ let applicantsContract = extractor.getApplicantsByFilter(PRIORITY.Contract, null
 console.log(`    MAX: ${extractor.getScoreMetric(
     applicantsContract,
     SCORE_METRIC.max
-)}`);
-
-console.log(`    AVG: ${extractor.getScoreMetric(
-    applicantsContract,
-    SCORE_METRIC.avg
 )}`);
 
 console.log(`    MIN: ${extractor.getScoreMetric(
@@ -268,20 +258,8 @@ let applicantsFirstPriorityWithoutQuotas = extractor.getApplicantsByFilter(PRIOR
 let applicantsOther =  applicantsFirstPriorityWithoutQuotas.concat(applicantsFirstPriorityQuotasNotPass);
 applicantsOther.sort(extractor.sortByScore);
 
-
-const reportJson = [];
-
 applicantsFirstPriorityQuotasPass.forEach((applicant, index) => {
     console.log(`${index + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
-
-    reportJson.push({
-        position: index + 1,
-        id: applicant.id,
-        priority: applicant.priority,
-        score: applicant.score,
-        has_quota: applicant.hasQuota,
-        rating: 'quotas'
-    });
 });
 
 for (let i = 0; i < extractor.getGovernmentLimit() - extractor.getQuotasLimit(); i++) {
@@ -289,26 +267,8 @@ for (let i = 0; i < extractor.getGovernmentLimit() - extractor.getQuotasLimit();
 
     if (applicant) {
         console.log(`${i + extractor.getQuotasLimit() + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
-
-        reportJson.push({
-            position: i + extractor.getQuotasLimit() + 1,
-            id: applicant.id,
-            priority: applicant.priority,
-            score: applicant.score,
-            has_quota: applicant.hasQuota,
-            rating: 'general'
-        });
     } else {
         console.log(`${i + extractor.getQuotasLimit() + 1}. Free place ✅`);
-
-        reportJson.push({
-            position: i + extractor.getQuotasLimit() + 1,
-            id: '',
-            priority: '',
-            score: '',
-            has_quota: '',
-            rating: 'free'
-        });
     }
 }
 console.log(`\n`);
@@ -316,32 +276,12 @@ console.log(`\n`);
 console.log(`💵 Forecasted rating list [contract]`);
 console.log(`\n`);
 
-let reportContractJson = [];
 for (let i = 0; i < extractor.getContractLimit(); i++) {
     let applicant = applicantsContract[i] ?? undefined;
 
     if (applicant) {
         console.log(`${i + 1}. ID: ${applicant.id} || ${applicant.score}`);
-
-        reportContractJson.push({
-            position: i + extractor.getQuotasLimit() + 1,
-            id: applicant.id,
-            priority: applicant.priority,
-            score: applicant.score,
-            has_quota: applicant.hasQuota,
-            rating: 'general'
-        });
-
     } else {
         console.log(`${i + 1}. Free place ✅`);
-
-        reportContractJson.push({
-            position: i + extractor.getQuotasLimit() + 1,
-            id: '',
-            priority: '',
-            score: '',
-            has_quota: '',
-            rating: 'free'
-        });
     }
 }

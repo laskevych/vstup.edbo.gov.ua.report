@@ -1,5 +1,7 @@
 {
+  "type": "commonjs",
   "dependencies": {
+    "axios": "^0.27.2",
     "csv-writer": "^1.6.0",
     "puppeteer": "^16.1.0",
     "puppeteer-core": "^16.1.0",
