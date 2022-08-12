@@ -228,6 +228,11 @@ console.log(`    MAX: ${extractor.getScoreMetric(
     SCORE_METRIC.max
 )}`);
 
+console.log(`    AVG: ${extractor.getScoreMetric(
+    applicantsFirstPriority,
+    SCORE_METRIC.avg
+)}`);
+
 console.log(`    MIN: ${extractor.getScoreMetric(
     applicantsFirstPriority,
     SCORE_METRIC.min
@@ -239,6 +244,11 @@ let applicantsContract = extractor.getApplicantsByFilter(PRIORITY.Contract, null
 console.log(`    MAX: ${extractor.getScoreMetric(
     applicantsContract,
     SCORE_METRIC.max
+)}`);
+
+console.log(`    AVG: ${extractor.getScoreMetric(
+    applicantsContract,
+    SCORE_METRIC.avg
 )}`);
 
 console.log(`    MIN: ${extractor.getScoreMetric(
