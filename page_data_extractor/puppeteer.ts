@@ -83,12 +83,17 @@ async function runDataExtracting(): Promise<any> {
             waitUntil: ['domcontentloaded', 'load']
         });
 
-        try {
-            const loadMoreButton = await page.waitForSelector('button[id="requests-load"]', {timeout: 5000});
-            await loadMoreButton.click({delay: 3000});
-        } catch (error: any) {
 
+        let loadMore = true;
+        while (loadMore) {
+            try {
+                const loadMoreButton = await page.waitForSelector('button[id="requests-load"]', {timeout: 5000});
+                await loadMoreButton.click({delay: 3000});
+            } catch (error: any) {
+                loadMore = false;
+            }
         }
+
 
 
         const extractedData = await page.evaluate(dataExtracting);

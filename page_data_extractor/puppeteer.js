@@ -88,11 +88,15 @@ function runDataExtracting() {
             yield page.goto(pageDetails.url, {
                 waitUntil: ['domcontentloaded', 'load']
             });
-            try {
-                const loadMoreButton = yield page.waitForSelector('button[id="requests-load"]', { timeout: 5000 });
-                yield loadMoreButton.click({ delay: 3000 });
-            }
-            catch (error) {
+            let loadMore = true;
+            while (loadMore) {
+                try {
+                    const loadMoreButton = yield page.waitForSelector('button[id="requests-load"]', { timeout: 5000 });
+                    yield loadMoreButton.click({ delay: 3000 });
+                }
+                catch (error) {
+                    loadMore = false;
+                }
             }
             const extractedData = yield page.evaluate(dataExtracting);
             if (Array.isArray(extractedData)) {
