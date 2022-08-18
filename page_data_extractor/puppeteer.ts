@@ -8,16 +8,16 @@ const pagesForExtracting = [
         "speciality_id": "121",
         "url": "https://vstup.edbo.gov.ua/offer/1069038/"
     },
-    {
-        "speciality": "Комп’ютерні науки",
-        "speciality_id": "122",
-        "url": "https://vstup.edbo.gov.ua/offer/1069055/"
-    },
-    {
-        "speciality": "Комп'ютерні науки. Моделювання, проектування та комп'ютерна графіка",
-        "speciality_id": "122",
-        "url": "https://vstup.edbo.gov.ua/offer/1068975/"
-    },
+    // {
+    //     "speciality": "Комп’ютерні науки",
+    //     "speciality_id": "122",
+    //     "url": "https://vstup.edbo.gov.ua/offer/1069055/"
+    // },
+    // {
+    //     "speciality": "Комп'ютерні науки. Моделювання, проектування та комп'ютерна графіка",
+    //     "speciality_id": "122",
+    //     "url": "https://vstup.edbo.gov.ua/offer/1068975/"
+    // },
     {
         "speciality": "Комп’ютерні науки та інтелектуальні системи (Інноваційний кампус)",
         "speciality_id": "122",
@@ -28,26 +28,26 @@ const pagesForExtracting = [
         "speciality_id": "123",
         "url": "https://vstup.edbo.gov.ua/offer/1069060/"
     },
-    {
-        "speciality": "Прикладна комп'ютерна інженерія",
-        "speciality_id": "123",
-        "url": "https://vstup.edbo.gov.ua/offer/1069068/"
-    },
-    {
-        "speciality": "Системний аналіз і управління",
-        "speciality_id": "124",
-        "url": "https://vstup.edbo.gov.ua/offer/1069074/"
-    },
-    {
-        "speciality": "Кібербезпека",
-        "speciality_id": "125",
-        "url": "https://vstup.edbo.gov.ua/offer/1069080/"
-    },
-    {
-        "speciality": "Програмне забезпечення інформаційних систем (Інноваційний кампус)",
-        "speciality_id": "126",
-        "url": "https://vstup.edbo.gov.ua/offer/1069087/"
-    }
+    // {
+    //     "speciality": "Прикладна комп'ютерна інженерія",
+    //     "speciality_id": "123",
+    //     "url": "https://vstup.edbo.gov.ua/offer/1069068/"
+    // },
+    // {
+    //     "speciality": "Системний аналіз і управління",
+    //     "speciality_id": "124",
+    //     "url": "https://vstup.edbo.gov.ua/offer/1069074/"
+    // },
+    // {
+    //     "speciality": "Кібербезпека",
+    //     "speciality_id": "125",
+    //     "url": "https://vstup.edbo.gov.ua/offer/1069080/"
+    // },
+    // {
+    //     "speciality": "Програмне забезпечення інформаційних систем (Інноваційний кампус)",
+    //     "speciality_id": "126",
+    //     "url": "https://vstup.edbo.gov.ua/offer/1069087/"
+    // }
 ];
 
 (async () => {
@@ -107,7 +107,7 @@ async function runDataExtracting(): Promise<any> {
         }
     }
 
-    const csvWriter = require('csv-writer').createObjectCsvWriter({
+    /*const csvWriter = require('csv-writer').createObjectCsvWriter({
         path: 'report.csv',
         header: [
             {id: 'speciality_id', title: 'speciality_id'},
@@ -119,6 +119,19 @@ async function runDataExtracting(): Promise<any> {
             {id: 'has_quota', title: 'has_quota'},
             {id: 'rating', title: 'rating'},
             {id: 'type', title: 'type'}
+        ]
+    });*/
+
+    const csvWriter = require('csv-writer').createObjectCsvWriter({
+        path: 'report.csv',
+        header: [
+            {id: 'speciality_id', title: 'speciality_id'},
+            {id: 'speciality', title: 'speciality'},
+            {id: 'id', title: 'id'},
+            {id: 'priority', title: 'priority'},
+            {id: 'score', title: 'score'},
+            {id: 'type', title: 'type'},
+            {id: 'limit', title: 'limit'}
         ]
     });
 
@@ -404,5 +417,18 @@ function dataExtracting() {
         }
     }
 
-    return reportJson.concat(reportContractJson);
+    const result:any = [];
+    const applicantsAll = extractor.getApplicants();
+    applicantsAll.forEach(applicant => {
+        result.push({
+            id: applicant.id,
+            priority: applicant.priority,
+            score: applicant.score,
+            has_quota: applicant.hasQuota,
+            type: applicant.priority === 6 ? 'contract' : 'government',
+            limit: applicant.priority === 6 ? extractor.getContractLimit() : extractor.getGovernmentLimit() - extractor.getQuotasLimit()
+        });
+    })
+
+    return result;
 }
