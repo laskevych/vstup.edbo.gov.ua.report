@@ -132,11 +132,19 @@ class Extractor {
         }
 
         /**
-         * Заявки со статусом "Допущенные"
+         * Заявки со статусом "до наказу (бюджет)"
          */
-        const STATUS_ADMITTED: string = 'request-status-6';
+        const STATUS_GOVERMENT: string = 'request-status-14'; //14
 
-        const elements = document.getElementsByClassName(STATUS_ADMITTED);
+        /**
+         * Заявки со статусом "рекомендовано (бюджет)"
+         */
+        const STATUS_RATING: string = 'request-status-9';
+
+        const elements = [
+            ...document.getElementsByClassName('request-status-14'),
+            ...document.getElementsByClassName('request-status-9')
+        ]
 
         const applicants = [];
         for (let i = 0; i < elements.length; i++) {
@@ -157,7 +165,8 @@ class Extractor {
             if (scoreElement.length > 0) {
                 let textContent = scoreElement[0].getElementsByTagName('div')[0].textContent;
 
-                score = textContent ? parseInt(textContent) : -1;
+                score = textContent ? parseFloat(textContent.replace(',', '.')) : -1;
+                console.log(score);
             }
 
             /* Priority */
@@ -206,92 +215,11 @@ class Extractor {
 
 const extractor = new Extractor();
 
-/* Report */
+let message = '';
+extractor.getApplicants().forEach((applicant, index, applicants) => {
+    const hasGrant = index + 1 <= 52;
 
-console.log(`🚀️ Priority`);
-console.log(`   1️⃣ Priority: ${extractor.getApplicantsByFilter(PRIORITY.First, null).length} requests.`);
-console.log(`   2️⃣ Priority: ${extractor.getApplicantsByFilter(PRIORITY.Second, null).length} requests.`);
-console.log(`   3️⃣ Priority: ${extractor.getApplicantsByFilter(PRIORITY.Third, null).length} requests.`);
-console.log(`   4️⃣ Priority: ${extractor.getApplicantsByFilter(PRIORITY.Fourth, null).length} requests.`);
-console.log(`   5️⃣ Priority: ${extractor.getApplicantsByFilter(PRIORITY.Fifth, null).length} requests.`);
-console.log(`   💵 Contract: ${extractor.getApplicantsByFilter(PRIORITY.Contract, null).length} requests.`);
-console.log(`   ⛔️ Error: ${extractor.getApplicantsByFilter(PRIORITY.Error, null).length} requests.`);
-console.log('\n');
-
-console.log(`👋 Quota: ${extractor.getApplicantsByFilter(null, true).length} requests of limit ${extractor.getQuotasLimit()}`);
-console.log(`\n`);
-
-console.log(`1️⃣ First priority score report`);
-let applicantsFirstPriority = extractor.getApplicantsByFilter(PRIORITY.First, null);
-console.log(`    MAX: ${extractor.getScoreMetric(
-    applicantsFirstPriority,
-    SCORE_METRIC.max
-)}`);
-
-console.log(`    AVG: ${extractor.getScoreMetric(
-    applicantsFirstPriority,
-    SCORE_METRIC.avg
-)}`);
-
-console.log(`    MIN: ${extractor.getScoreMetric(
-    applicantsFirstPriority,
-    SCORE_METRIC.min
-)}`);
-console.log(`\n`);
-
-console.log(`💵 Contract score report`);
-let applicantsContract = extractor.getApplicantsByFilter(PRIORITY.Contract, null);
-console.log(`    MAX: ${extractor.getScoreMetric(
-    applicantsContract,
-    SCORE_METRIC.max
-)}`);
-
-console.log(`    AVG: ${extractor.getScoreMetric(
-    applicantsContract,
-    SCORE_METRIC.avg
-)}`);
-
-console.log(`    MIN: ${extractor.getScoreMetric(
-    applicantsContract,
-    SCORE_METRIC.min
-)}`);
-console.log(`\n`);
-
-console.log(`👑 Forecasted rating`);
-console.log(`\n`);
-
-let applicantsFirstPriorityQuotas = extractor.getApplicantsByFilter(PRIORITY.First, true);
-let applicantsFirstPriorityQuotasPass = applicantsFirstPriorityQuotas.slice(0, extractor.getQuotasLimit());
-let applicantsFirstPriorityQuotasNotPass = applicantsFirstPriorityQuotas.slice(extractor.getQuotasLimit());
-
-let applicantsFirstPriorityWithoutQuotas = extractor.getApplicantsByFilter(PRIORITY.First, false);
-let applicantsOther =  applicantsFirstPriorityWithoutQuotas.concat(applicantsFirstPriorityQuotasNotPass);
-applicantsOther.sort(extractor.sortByScore);
-
-applicantsFirstPriorityQuotasPass.forEach((applicant, index) => {
-    console.log(`${index + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
+    message += `${index + 1}. Score: ${applicant.score}. Title: ${applicant.id}. Scholarship: ${hasGrant ? '✅' : '🚫'}` + '\n';
 });
 
-for (let i = 0; i < extractor.getGovernmentLimit() - extractor.getQuotasLimit(); i++) {
-    let applicant = applicantsOther[i] ?? undefined;
-
-    if (applicant) {
-        console.log(`${i + extractor.getQuotasLimit() + 1}. ID: ${applicant.id} || ${applicant.score} ${applicant.hasQuota ? '|| 🎫' : ''}`);
-    } else {
-        console.log(`${i + extractor.getQuotasLimit() + 1}. Free place ✅`);
-    }
-}
-console.log(`\n`);
-
-console.log(`💵 Forecasted rating list [contract]`);
-console.log(`\n`);
-
-for (let i = 0; i < extractor.getContractLimit(); i++) {
-    let applicant = applicantsContract[i] ?? undefined;
-
-    if (applicant) {
-        console.log(`${i + 1}. ID: ${applicant.id} || ${applicant.score}`);
-    } else {
-        console.log(`${i + 1}. Free place ✅`);
-    }
-}
+console.log(message);
